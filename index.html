@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACK CHICKEN — Dashboard Histórico v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --gold:#C9A84C;--gold-light:#E8C97A;--black:#0A0A0A;--dark:#111111;
+    --card:#181818;--card2:#1E1E1E;--border:#2A2A2A;--text:#E8E8E8;--muted:#666;
+    --green:#4CAF50;--green-d:rgba(76,175,80,.12);
+    --yellow:#FFC107;--yellow-d:rgba(255,193,7,.12);
+    --red:#E53935;--red-d:rgba(229,57,53,.12);
+    --blue:#42A5F5;--blue-d:rgba(66,165,245,.12);
+    --purple:#AB47BC;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
+
+  /* ── HEADER ── */
+  header{background:var(--dark);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+  .logo{display:flex;align-items:center;gap:14px;}
+  .logo-icon{width:34px;height:34px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:17px;color:var(--black);}
+  .logo-text{font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--gold);}
+  .logo-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+  .header-right{display:flex;align-items:center;gap:8px;}
+  .badge{background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:3px 9px;font-size:11px;color:var(--muted);font-family:'DM Mono';}
+  .badge.live{border-color:var(--gold);color:var(--gold);}
+  .btn-sm{background:transparent;border:1px solid var(--border);border-radius:4px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'DM Sans';letter-spacing:.5px;text-transform:uppercase;transition:all .2s;}
+  .btn-sm:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-sm.blue:hover{border-color:var(--blue);color:var(--blue);}
+
+  /* ── TABS ── */
+  .tabs{display:flex;border-bottom:1px solid var(--border);padding:0 32px;background:var(--dark);overflow-x:auto;}
+  .tab{padding:11px 18px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+  .tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .tab:hover:not(.active){color:var(--text);}
+
+  /* ── LAYOUT ── */
+  .main{padding:24px 32px;max-width:1700px;margin:0 auto;}
+  .section{display:none;}.section.active{display:block;}
+  .g2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+  .g2e{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  .g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  .mb{margin-bottom:16px;}
+
+  /* ── KPI STRIP ── */
+  .kpi-strip{display:grid;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+  .kpi{background:var(--card);padding:16px 18px;position:relative;}
+  .kpi-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+  .kpi-value{font-family:'Bebas Neue';font-size:24px;letter-spacing:1px;line-height:1;}
+  .kpi-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:'DM Mono';}
+  .kpi-tag{position:absolute;top:12px;right:12px;font-size:9px;font-family:'DM Mono';padding:2px 6px;border-radius:3px;font-weight:600;letter-spacing:.5px;}
+  .tag-excellent{background:rgba(76,175,80,.2);color:#81c784;border:1px solid rgba(76,175,80,.3);}
+  .tag-good{background:rgba(139,195,74,.15);color:#aed581;border:1px solid rgba(139,195,74,.25);}
+  .tag-normal{background:rgba(255,193,7,.15);color:#ffd54f;border:1px solid rgba(255,193,7,.25);}
+  .tag-warning{background:rgba(255,152,0,.15);color:#ffb74d;border:1px solid rgba(255,152,0,.25);}
+  .tag-danger{background:rgba(229,57,53,.2);color:#ef9a9a;border:1px solid rgba(229,57,53,.3);}
+
+  /* ── CHART CARD ── */
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;}
+  .chart-title{font-family:'Bebas Neue';font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:2px;}
+  .chart-sub{font-size:10px;color:var(--muted);margin-bottom:14px;}
+
+  /* ── BENCHMARK LEGEND ── */
+  .bm-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
+  .bm-dot{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:'DM Mono';}
+  .bm-dot span{width:8px;height:8px;border-radius:2px;display:inline-block;}
+
+  /* ── TABLE ── */
+  .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+  .table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  table{width:100%;border-collapse:collapse;}
+  thead th{background:var(--card2);padding:9px 13px;text-align:right;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);}
+  thead th:first-child{text-align:left;}
+  tbody tr{border-bottom:1px solid #191919;transition:background .15s;}
+  tbody tr:hover{background:rgba(201,168,76,.03);}
+  tbody tr:last-child{border-bottom:none;}
+  tbody td{padding:9px 13px;text-align:right;font-family:'DM Mono';font-size:11px;color:var(--text);}
+  tbody td:first-child{text-align:left;font-family:'DM Sans';font-weight:500;color:var(--gold-light);font-size:12px;}
+  .c-ex{color:#81c784!important;}.c-ok{color:#aed581!important;}.c-no{color:#ffd54f!important;}.c-wa{color:#ffb74d!important;}.c-ba{color:#ef9a9a!important;}.c-mu{color:var(--muted)!important;font-size:10px!important;}
+  .pill{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.5px;font-family:'DM Mono';}
+  .pill-ex{background:rgba(76,175,80,.15);color:#81c784;}.pill-ok{background:rgba(139,195,74,.12);color:#aed581;}
+  .pill-no{background:rgba(255,193,7,.12);color:#ffd54f;}.pill-wa{background:rgba(255,152,0,.15);color:#ffb74d;}
+  .pill-ba{background:rgba(229,57,53,.15);color:#ef9a9a;}
+  .btn-del{background:transparent;border:1px solid #2a1a1a;border-radius:3px;color:#b71c1c;font-size:9px;padding:2px 7px;cursor:pointer;font-family:'DM Mono';transition:all .2s;}
+  .btn-del:hover{background:#c62828;color:#fff;border-color:#c62828;}
+
+  /* ── BENCHMARK PANEL ── */
+  .bm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+  .bm-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;}
+  .bm-card-title{font-family:'Bebas Neue';font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .bm-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #161616;}
+  .bm-row:last-child{border-bottom:none;}
+  .bm-name{font-size:11px;color:var(--text);}
+  .bm-range{font-size:10px;color:var(--muted);font-family:'DM Mono';}
+  .bm-your{font-family:'DM Mono';font-size:12px;font-weight:600;}
+
+  /* ── GAUGE METER ── */
+  .gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .gauge-bar{width:100%;height:8px;border-radius:4px;background:var(--border);overflow:hidden;position:relative;}
+  .gauge-fill{height:100%;border-radius:4px;transition:width .5s;}
+  .gauge-ticks{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'DM Mono';margin-top:2px;}
+
+  /* ── PRIME COST GAUGE ── */
+  .prime-gauge{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;}
+  .prime-title{font-family:'Bebas Neue';font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:16px;}
+  .meter{position:relative;height:12px;background:linear-gradient(to right,#1b5e20 0%,#2e7d32 20%,#558b2f 35%,#f9a825 50%,#e65100 70%,#b71c1c 100%);border-radius:6px;margin:8px 0 4px;}
+  .meter-needle{position:absolute;top:-4px;width:4px;height:20px;background:white;border-radius:2px;transform:translateX(-50%);transition:left .5s;box-shadow:0 0 6px rgba(255,255,255,.5);}
+  .meter-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'DM Mono';}
+
+  /* ── ALERT STRIP ── */
+  .alert-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+  .al{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;border-left:3px solid var(--border);}
+  .al.r{border-left-color:var(--red);}.al.y{border-left-color:var(--yellow);}.al.g{border-left-color:var(--green);}
+  .al-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+  .al.r .al-t{color:var(--red);}.al.y .al-t{color:var(--yellow);}.al.g .al-t{color:var(--green);}
+  .al-b{font-size:12px;color:var(--text);line-height:1.5;}
+  .al-b strong{color:var(--gold-light);}
+
+  .insight{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:14px 18px;margin-bottom:16px;}
+  .insight-t{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:7px;font-weight:700;}
+  .insight-b{font-size:12px;color:var(--text);line-height:1.7;}
+  .insight-b strong{color:var(--gold-light);}
+
+  .sec-div{font-family:'Bebas Neue';font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sec-div::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* ── MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:500;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--dark);border:1px solid var(--border);border-radius:12px;width:700px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+  .modal-hdr{padding:22px 26px 0;display:flex;align-items:center;justify-content:space-between;}
+  .modal-ttl{font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--gold);}
+  .modal-x{background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;}
+  .modal-x:hover{color:var(--text);}
+  .modal-bdy{padding:20px 26px;}
+  .modal-note{font-size:11px;color:var(--muted);margin-bottom:20px;letter-spacing:.5px;}
+  .fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+  .fst{grid-column:1/-1;font-family:'Bebas Neue';font-size:12px;letter-spacing:2px;color:var(--muted);padding-bottom:7px;border-bottom:1px solid var(--border);margin-top:6px;}
+  .fg .g1{grid-column:1/-1;}
+  .fgrp{display:flex;flex-direction:column;gap:5px;}
+  .fgrp label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .fgrp input,.fgrp select{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 11px;color:var(--text);font-family:'DM Mono';font-size:12px;outline:none;transition:border-color .2s;}
+  .fgrp input:focus,.fgrp select:focus{border-color:var(--gold);}
+  .fgrp .hint{font-size:9px;color:var(--muted);}
+  .fgrp input::placeholder{color:#3a3a3a;}
+  .modal-ftr{padding:0 26px 22px;display:flex;gap:10px;justify-content:flex-end;}
+  .btn-prim{background:var(--gold);border:none;border-radius:6px;padding:9px 22px;font-family:'Bebas Neue';font-size:14px;letter-spacing:2px;color:var(--black);cursor:pointer;transition:opacity .2s;}
+  .btn-prim:hover{opacity:.85;}
+  .btn-sec{background:transparent;border:1px solid var(--border);border-radius:6px;padding:9px 18px;font-family:'DM Sans';font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s;}
+  .btn-sec:hover{border-color:var(--text);color:var(--text);}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px 18px;font-size:12px;z-index:999;transform:translateY(70px);opacity:0;transition:all .3s;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.success{border-left:3px solid var(--green);color:#81c784;}
+  .toast.error{border-left:3px solid var(--red);color:#ef9a9a;}
+
+  @media(max-width:1000px){
+    .kpi-strip{grid-template-columns:repeat(3,1fr)!important;}
+    .g2,.g2e,.g3,.g4,.alert-strip,.bm-grid{grid-template-columns:1fr;}
+    .fg{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="mo">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-ttl">Agregar Mes</div>
+      <button class="modal-x" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-bdy">
+      <div class="modal-note">Los datos se guardan en este navegador automáticamente. Los históricos base no se pueden eliminar.</div>
+      <div class="fg">
+        <div class="fgrp g1">
+          <label>Mes y Año</label>
+          <select id="fmes">
+            <option value="">Seleccionar...</option>
+            <option>Febrero 2026</option><option>Marzo 2026</option><option>Abril 2026</option>
+            <option>Mayo 2026</option><option>Junio 2026</option><option>Julio 2026</option>
+            <option>Agosto 2026</option><option>Septiembre 2026</option><option>Octubre 2026</option>
+            <option>Noviembre 2026</option><option>Diciembre 2026</option><option>Enero 2027</option>
+            <option value="custom">Otro...</option>
+          </select>
+        </div>
+        <div class="fgrp g1" id="fmcg" style="display:none">
+          <label>Nombre personalizado</label>
+          <input type="text" id="fmcc" placeholder="ej: Febrero 2027">
+        </div>
+        <div class="fst">BC1 — Las Condes</div>
+        <div class="fgrp"><label>Ventas Brutas BC1 ($)</label><input type="number" id="fb1v" placeholder="135849824"><span class="hint">Sin puntos</span></div>
+        <div class="fgrp"><label>Ganancia Neta BC1 ($)</label><input type="number" id="fb1g" placeholder="12892368"></div>
+        <div class="fgrp"><label>COGS BC1 (%)</label><input type="number" step="0.01" id="fb1c" placeholder="31.06"></div>
+        <div class="fgrp"><label>Costo Personal BC1 (%)</label><input type="number" step="0.01" id="fb1p" placeholder="29.60"></div>
+        <div class="fgrp"><label>Comisión Delivery BC1 (%)</label><input type="number" step="0.01" id="fb1d" placeholder="13.13"><span class="hint">Opcional</span></div>
+        <div class="fgrp"><label>Arriendo BC1 (%)</label><input type="number" step="0.01" id="fb1r" placeholder="8.50"><span class="hint">Opcional</span></div>
+        <div class="fst">BC2</div>
+        <div class="fgrp"><label>Ventas Brutas BC2 ($)</label><input type="number" id="fb2v" placeholder="47063795"></div>
+        <div class="fgrp"><label>Ganancia Neta BC2 ($)</label><input type="number" id="fb2g" placeholder="4019246"></div>
+        <div class="fgrp"><label>COGS BC2 (%)</label><input type="number" step="0.01" id="fb2c" placeholder="27.70"></div>
+        <div class="fgrp"><label>Costo Personal BC2 (%)</label><input type="number" step="0.01" id="fb2p" placeholder="32.34"></div>
+        <div class="fgrp"><label>Comisión Delivery BC2 (%)</label><input type="number" step="0.01" id="fb2d" placeholder="5.54"><span class="hint">Opcional</span></div>
+        <div class="fgrp"><label>Arriendo BC2 (%)</label><input type="number" step="0.01" id="fb2r" placeholder="8.50"><span class="hint">Opcional</span></div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-sec" onclick="closeModal()">Cancelar</button>
+      <button class="btn-prim" onclick="saveMonth()">Guardar Mes</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">BC</div>
+    <div>
+      <div class="logo-text">Black Chicken</div>
+      <div class="logo-sub">Dashboard v4 · <span id="hRange">2025–2026</span></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge">BC1 Las Condes</span>
+    <span class="badge">BC2</span>
+    <span class="badge live" id="bLive">● Ene 2026</span>
+    <button class="btn-sm" onclick="exportCSV()">↓ CSV</button>
+    <button class="btn-sm" onclick="openModal()">+ Agregar Mes</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showSec('overview',this)">Visión General</div>
+  <div class="tab" onclick="showSec('benchmarks',this)">Benchmarks</div>
+  <div class="tab" onclick="showSec('ventas',this)">Ventas</div>
+  <div class="tab" onclick="showSec('costos',this)">Costos</div>
+  <div class="tab" onclick="showSec('personal',this)">Personal</div>
+  <div class="tab" onclick="showSec('tabla',this)">Tabla</div>
+</div>
+
+<div class="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="section active" id="section-overview">
+    <div class="kpi-strip" id="kpiMain" style="grid-template-columns:repeat(7,1fr)"></div>
+    <div class="alert-strip" id="alertMain"></div>
+    <div class="g2">
+      <div class="chart-card">
+        <div class="chart-title">Ventas Mensuales BC1 + BC2</div>
+        <div class="chart-sub">Historial completo · CLP</div>
+        <div style="position:relative;height:270px"><canvas id="cVcomb"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Ganancia Neta</div>
+        <div class="chart-sub">BC1 vs BC2</div>
+        <div style="position:relative;height:270px"><canvas id="cGan"></canvas></div>
+      </div>
+    </div>
+    <div class="g2e">
+      <div class="chart-card">
+        <div class="chart-title">COGS % — Food Cost</div>
+        <div class="chart-sub">Zonas: verde excelente (&lt;30%) · amarillo normal (30–34%) · rojo problema (35%+)</div>
+        <div class="bm-legend">
+          <div class="bm-dot"><span style="background:#1b5e20"></span>Excelente &lt;30%</div>
+          <div class="bm-dot"><span style="background:#f9a825"></span>Normal 30–34%</div>
+          <div class="bm-dot"><span style="background:#b71c1c"></span>Problema 35%+</div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="cCOGSov"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Prime Cost = COGS + Labor</div>
+        <div class="chart-sub">Target industria: 55–65% · Danger: &gt;70%</div>
+        <div style="position:relative;height:200px"><canvas id="cPrime"></canvas></div>
+      </div>
+    </div>
+    <div class="insight"><div class="insight-t">📊 Análisis Ejecutivo</div><div class="insight-b" id="insightMain"></div></div>
+  </div>
+
+  <!-- ══ BENCHMARKS ══ -->
+  <div class="section" id="section-benchmarks">
+    <div class="sec-div">Control vs Estándares Fast Casual — Último Mes</div>
+
+    <!-- Prime Cost Gauges -->
+    <div class="g2e mb">
+      <div class="prime-gauge">
+        <div class="prime-title">Prime Cost BC1 (COGS + Labor)</div>
+        <div style="font-family:'Bebas Neue';font-size:36px;color:var(--text)" id="bPrimeVal1">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Target industria: 55–65%</div>
+        <div class="meter"><div class="meter-needle" id="bPrimeNeedle1"></div></div>
+        <div class="meter-labels"><span>40%</span><span>55%</span><span>65%</span><span>75%</span><span>85%+</span></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--muted)" id="bPrimeComment1"></div>
+      </div>
+      <div class="prime-gauge">
+        <div class="prime-title">Prime Cost BC2 (COGS + Labor)</div>
+        <div style="font-family:'Bebas Neue';font-size:36px;color:var(--text)" id="bPrimeVal2">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Target industria: 55–65%</div>
+        <div class="meter"><div class="meter-needle" id="bPrimeNeedle2"></div></div>
+        <div class="meter-labels"><span>40%</span><span>55%</span><span>65%</span><span>75%</span><span>85%+</span></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--muted)" id="bPrimeComment2"></div>
+      </div>
+    </div>
+
+    <!-- Benchmark cards -->
+    <div class="bm-grid" id="bmGrid"></div>
+
+    <!-- Benchmark history table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="chart-title" style="margin:0">Histórico de Benchmarks por Mes</div>
+        <span class="badge" id="bmMesesBadge">— meses</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Mes</th>
+          <th>COGS BC1</th><th>Status</th>
+          <th>Labor BC1</th><th>Status</th>
+          <th>Prime BC1</th><th>Status</th>
+          <th>COGS BC2</th><th>Status</th>
+          <th>Labor BC2</th><th>Status</th>
+          <th>Prime BC2</th><th>Status</th>
+          <th>Margen BC1</th>
+        </tr></thead>
+        <tbody id="tBm"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ VENTAS ══ -->
+  <div class="section" id="section-ventas">
+    <div class="sec-div">Análisis de Ventas</div>
+    <div class="g2e">
+      <div class="chart-card">
+        <div class="chart-title">Evolución BC1</div>
+        <div class="chart-sub">Ventas brutas mensuales</div>
+        <div style="position:relative;height:250px"><canvas id="cBC1v"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Estacionalidad BC1</div>
+        <div class="chart-sub">Índice 100 = promedio del periodo</div>
+        <div style="position:relative;height:250px"><canvas id="cEstac"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card mb">
+      <div class="chart-title">BC1 vs BC2 — Comparativo</div>
+      <div class="chart-sub">Ambos locales</div>
+      <div style="position:relative;height:230px"><canvas id="cBC1v2"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ══ COSTOS ══ -->
+  <div class="section" id="section-costos">
+    <div class="sec-div">Food Cost &amp; Margen</div>
+    <div class="g3">
+      <div class="chart-card">
+        <div class="chart-title">COGS BC1</div>
+        <div class="chart-sub">Excelente &lt;30 · Normal 30–34 · Problema 35+</div>
+        <div style="position:relative;height:190px"><canvas id="cC1"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">COGS BC2</div>
+        <div class="chart-sub">Excelente &lt;30 · Normal 30–34 · Problema 35+</div>
+        <div style="position:relative;height:190px"><canvas id="cC2"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Ganancia Combinada</div>
+        <div class="chart-sub">BC1 + BC2 · Verde &gt;20M · Amarillo &gt;5M</div>
+        <div style="position:relative;height:190px"><canvas id="cGC"></canvas></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header"><div class="chart-title" style="margin:0">Costos &amp; Margen Mensual</div></div>
+      <table><thead><tr>
+        <th>Mes</th><th>Ventas BC1</th><th>COGS BC1</th><th>Margen Bruto</th><th>Ganancia BC1</th>
+        <th>Ventas BC2</th><th>COGS BC2</th><th>Margen Bruto</th><th>Ganancia BC2</th><th>Ganancia Total</th>
+      </tr></thead><tbody id="tCost"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ══ PERSONAL ══ -->
+  <div class="section" id="section-personal">
+    <div class="sec-div">Costo de Personal — Control vs Benchmark</div>
+    <div class="kpi-strip" id="kpiPers" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div class="g2e">
+      <div class="chart-card">
+        <div class="chart-title">Labor BC1 vs BC2</div>
+        <div class="chart-sub">Zonas: verde &lt;25% · amarillo 25–33% · rojo 33%+</div>
+        <div class="bm-legend">
+          <div class="bm-dot"><span style="background:#1b5e20"></span>&lt;25%</div>
+          <div class="bm-dot"><span style="background:#f57f17"></span>25–33%</div>
+          <div class="bm-dot"><span style="background:#b71c1c"></span>&gt;33%</div>
+        </div>
+        <div style="position:relative;height:240px"><canvas id="cPers"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Correlación Labor vs Ganancia BC1</div>
+        <div class="chart-sub">Cuando labor sube, ganancia cae</div>
+        <div style="position:relative;height:240px"><canvas id="cCorr"></canvas></div>
+      </div>
+    </div>
+    <div class="al r mb">
+      <div class="al-t">Diagnóstico Labor</div>
+      <div class="al-b" id="laborDx" style="font-size:12px;line-height:1.8"></div>
+    </div>
+  </div>
+
+  <!-- ══ TABLA ══ -->
+  <div class="section" id="section-tabla">
+    <div class="sec-div">Datos Históricos Completos</div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="chart-title" style="margin:0">Todos los KPIs + Benchmarks</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge" id="tMesesBadge">— meses</span>
+          <button class="btn-sm blue" onclick="exportCSV()">↓ CSV</button>
+          <button class="btn-sm" onclick="openModal()">+ Agregar Mes</button>
+        </div>
+      </div>
+      <table><thead><tr>
+        <th>Mes</th>
+        <th>Ventas BC1</th><th>COGS BC1</th><th>Labor BC1</th><th>Prime BC1</th><th>Ganancia BC1</th>
+        <th>Ventas BC2</th><th>COGS BC2</th><th>Labor BC2</th><th>Prime BC2</th><th>Ganancia BC2</th>
+        <th>Total Ventas</th><th>Total Gan.</th><th></th>
+      </tr></thead><tbody id="tFull"></tbody></table>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════
+//  BENCHMARKS DEFINITION
+// ══════════════════════════════════════════════
+const BM = {
+  cogs:    { excellent:[0,30],  normal:[30,34],  warning:[34,35],  danger:[35,999]  },
+  labor:   { excellent:[0,25],  normal:[25,33],  warning:[33,38],  danger:[38,999]  },
+  prime:   { excellent:[0,55],  normal:[55,65],  warning:[65,70],  danger:[70,999]  },
+  ebitda:  { excellent:[18,999],normal:[10,18],  warning:[5,10],   danger:[0,5],    loss:[-999,0] },
+  margen:  { excellent:[66,999],normal:[60,66],  warning:[55,60],  danger:[0,55]    },
+  occupancy:{ excellent:[0,8],  normal:[8,12],   warning:[12,15],  danger:[15,999]  },
+  delivery:{ excellent:[0,12],  normal:[12,16],  warning:[16,20],  danger:[20,999]  },
+};
+
+function bmStatus(metric, val) {
+  if (val === null || val === undefined) return null;
+  const m = BM[metric];
+  if (!m) return null;
+  for (const [k, [lo, hi]] of Object.entries(m)) {
+    if (val >= lo && val < hi) return k;
+  }
+  return 'danger';
+}
+
+const STATUS_LABELS = {
+  excellent: 'Excelente', normal: 'Normal', warning: 'Atención', danger: 'Problema', loss: 'Pérdida'
+};
+const STATUS_PILL = {
+  excellent: 'pill-ex', normal: 'pill-ok', warning: 'pill-wa', danger: 'pill-ba', loss: 'pill-ba'
+};
+const STATUS_CLASS = {
+  excellent: 'c-ex', normal: 'c-ok', warning: 'c-wa', danger: 'c-ba', loss: 'c-ba'
+};
+const STATUS_KPI = {
+  excellent: 'tag-excellent', normal: 'tag-good', warning: 'tag-warning', danger: 'tag-danger', loss: 'tag-danger'
+};
+
+function pill(metric, val) {
+  if (val === null || val === undefined) return '<span class="c-mu">—</span>';
+  const s = bmStatus(metric, val);
+  return `<span class="pill ${STATUS_PILL[s]||'pill-no'}">${STATUS_LABELS[s]||'—'}</span>`;
+}
+function kpiTag(metric, val) {
+  if (val === null) return '';
+  const s = bmStatus(metric, val);
+  return `<div class="kpi-tag ${STATUS_KPI[s]||'tag-normal'}">${STATUS_LABELS[s]||'—'}</div>`;
+}
+function tdClass(metric, val) {
+  if (val === null) return 'c-mu';
+  return STATUS_CLASS[bmStatus(metric, val)] || '';
+}
+
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+const BASE = [
+  {mes:'Enero 2025',    bc1v:133793247,bc2v:0,        bc1c:null, bc2c:null, bc1g:28860054,bc2g:0,       bc1p:null, bc2p:null, bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Febrero 2025',  bc1v:109757194,bc2v:36018438, bc1c:34.77,bc2c:34.45,bc1g:9646214, bc2g:1941008, bc1p:25.46,bc2p:21.89,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Marzo 2025',    bc1v:139331581,bc2v:42655815, bc1c:28.97,bc2c:28.82,bc1g:29915850,bc2g:3050963, bc1p:22.39,bc2p:30.89,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Abril 2025',    bc1v:134170878,bc2v:46422486, bc1c:29.14,bc2c:34.35,bc1g:21745708,bc2g:6430838, bc1p:23.84,bc2p:28.39,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Mayo 2025',     bc1v:138128030,bc2v:42856430, bc1c:29.49,bc2c:27.80,bc1g:23938248,bc2g:4271323, bc1p:23.63,bc2p:33.62,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Junio 2025',    bc1v:136524283,bc2v:44472802, bc1c:30.34,bc2c:28.35,bc1g:17651136,bc2g:3573603, bc1p:24.32,bc2p:34.69,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Julio 2025',    bc1v:146121376,bc2v:53720754, bc1c:31.15,bc2c:26.84,bc1g:22560828,bc2g:11832861,bc1p:24.32,bc2p:28.02,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Agosto 2025',   bc1v:148558896,bc2v:45546157, bc1c:32.12,bc2c:30.33,bc1g:14557051,bc2g:4673220, bc1p:26.25,bc2p:32.28,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Septiembre 2025',bc1v:124490201,bc2v:43166000,bc1c:31.96,bc2c:28.98,bc1g:5412047, bc2g:3538169, bc1p:29.02,bc2p:33.57,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Octubre 2025',  bc1v:152705770,bc2v:51360592, bc1c:29.50,bc2c:28.71,bc1g:26011407,bc2g:10230542,bc1p:25.43,bc2p:29.92,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Noviembre 2025',bc1v:148768753,bc2v:48133836, bc1c:30.35,bc2c:30.44,bc1g:331586,  bc2g:3774539, bc1p:26.15,bc2p:34.24,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Diciembre 2025',bc1v:136289900,bc2v:43506993, bc1c:32.89,bc2c:27.99,bc1g:3777120, bc2g:3702056, bc1p:27.70,bc2p:44.00,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
+  {mes:'Enero 2026',    bc1v:135849824,bc2v:47063795, bc1c:31.06,bc2c:27.70,bc1g:12892368,bc2g:4019246, bc1p:29.60,bc2p:32.34,bc1d:13.13,bc2d:5.54,bc1r:null,bc2r:null},
+];
+const BASE_MESES = BASE.map(d=>d.mes);
+const SK = 'bc_months_v2';
+
+function loadData(){
+  try{const x=JSON.parse(localStorage.getItem(SK)||'[]');return[...BASE,...x];}catch(e){return[...BASE];}
+}
+function saveExtras(data){
+  localStorage.setItem(SK,JSON.stringify(data.filter(d=>!BASE_MESES.includes(d.mes))));
+}
+let DATA = loadData();
+
+// ══════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════
+const GOLD='#C9A84C',GOLDT='rgba(201,168,76,0.15)',BLUE='#42A5F5',BLUET='rgba(66,165,245,0.15)',RED='#E53935',GREEN='#4CAF50';
+Chart.defaults.color='#666'; Chart.defaults.borderColor='#222'; Chart.defaults.font.family='DM Mono'; Chart.defaults.font.size=10;
+
+function fmt(n,d=1){if(n===null||n===undefined)return'—';if(Math.abs(n)>=1e6)return'$'+(n/1e6).toFixed(d)+'M';return'$'+n.toLocaleString('es-CL');}
+function sh(m){const mp={Enero:'Ene',Febrero:'Feb',Marzo:'Mar',Abril:'Abr',Mayo:'May',Junio:'Jun',Julio:'Jul',Agosto:'Ago',Septiembre:'Sep',Octubre:'Oct',Noviembre:'Nov',Diciembre:'Dic'};const p=m.split(' ');return(mp[p[0]]||p[0])+' '+(p[1]?p[1].slice(2):'');}
+function avg(arr){const v=arr.filter(x=>x!==null&&x!==undefined);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
+function prime(d,loc){const c=loc===1?d.bc1c:d.bc2c,p=loc===1?d.bc1p:d.bc2p;return(c!==null&&p!==null)?+(c+p).toFixed(2):null;}
+function vNet(v){return v?Math.round(v/1.19):0;}  // Bruto → Neto (÷1.19 IVA 19%)
+function ebitda(d,loc){const vn=vNet(loc===1?d.bc1v:d.bc2v),g=loc===1?d.bc1g:d.bc2g;return vn>0?+((g/vn)*100).toFixed(2):null;}
+function mgnBruto(cogs){return cogs!==null?+(100-cogs).toFixed(2):null;}
+
+let charts={};
+function destroyAll(){Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};}
+
+// ══════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════
+function render(){
+  destroyAll();
+  const N=DATA.length;
+  const labels=DATA.map(d=>sh(d.mes));
+  const bc1V=DATA.map(d=>vNet(d.bc1v)), bc2V=DATA.map(d=>vNet(d.bc2v));
+  const bc1C=DATA.map(d=>d.bc1c), bc2C=DATA.map(d=>d.bc2c);
+  const bc1G=DATA.map(d=>d.bc1g), bc2G=DATA.map(d=>d.bc2g);
+  const bc1P=DATA.map(d=>d.bc1p), bc2P=DATA.map(d=>d.bc2p);
+  const bc1Prime=DATA.map(d=>prime(d,1)), bc2Prime=DATA.map(d=>prime(d,2));
+  const ganT=bc1G.map((v,i)=>v+bc2G[i]);
+  const last=DATA[N-1];
+
+  // Header
+  document.getElementById('bLive').textContent='● '+sh(last.mes);
+  document.getElementById('tMesesBadge').textContent=N+' meses';
+  document.getElementById('bmMesesBadge').textContent=N+' meses';
+
+  const avgC1=avg(bc1C), avgC2=avg(bc2C);
+  const avgP1=avg(bc1P), avgP2=avg(bc2P);
+  const lastPrime1=prime(last,1), lastPrime2=prime(last,2);
+  const lastEbitda1=ebitda(last,1), lastEbitda2=ebitda(last,2);
+
+  // ── KPI MAIN ──
+  const maxB1=Math.max(...bc1V), maxB2=Math.max(...bc2V.filter(v=>v>0));
+  document.getElementById('kpiMain').innerHTML=`
+    <div class="kpi"><div class="kpi-label">Venta Acumulada BC1</div><div class="kpi-value" style="color:var(--gold)">${fmt(bc1V.reduce((a,b)=>a+b,0),0)}</div><div class="kpi-sub">Las Condes · ${N} meses</div></div>
+    <div class="kpi"><div class="kpi-label">Venta Acumulada BC2</div><div class="kpi-value" style="color:var(--blue)">${fmt(bc2V.reduce((a,b)=>a+b,0),0)}</div><div class="kpi-sub">BC2 · ${bc2V.filter(v=>v>0).length} meses</div></div>
+    <div class="kpi"><div class="kpi-label">COGS Prom BC1</div><div class="kpi-value ${avgC1<30?'':''}">
+      <span style="color:${avgC1<30?'var(--green)':avgC1<34?'var(--yellow)':'var(--red)'}">${avgC1?avgC1.toFixed(1)+'%':'—'}</span></div>
+      <div class="kpi-sub">Target: &lt;30%</div>${kpiTag('cogs',avgC1)}</div>
+    <div class="kpi"><div class="kpi-label">COGS Prom BC2</div><div class="kpi-value">
+      <span style="color:${avgC2<30?'var(--green)':avgC2<34?'var(--yellow)':'var(--red)'}">${avgC2?avgC2.toFixed(1)+'%':'—'}</span></div>
+      <div class="kpi-sub">Target: &lt;30%</div>${kpiTag('cogs',avgC2)}</div>
+    <div class="kpi"><div class="kpi-label">Prime Cost BC1</div><div class="kpi-value">
+      <span style="color:${lastPrime1?lastPrime1<55?'var(--green)':lastPrime1<65?'var(--yellow)':'var(--red)':'var(--muted)'}">${lastPrime1?lastPrime1.toFixed(1)+'%':'—'}</span></div>
+      <div class="kpi-sub">COGS+Labor · ${sh(last.mes)}</div>${kpiTag('prime',lastPrime1)}</div>
+    <div class="kpi"><div class="kpi-label">EBITDA BC1</div><div class="kpi-value">
+      <span style="color:${lastEbitda1?lastEbitda1>=10?'var(--green)':lastEbitda1>=5?'var(--yellow)':'var(--red)':'var(--muted)'}">${lastEbitda1?lastEbitda1.toFixed(1)+'%':'—'}</span></div>
+      <div class="kpi-sub">Target: 10–18%</div>${kpiTag('ebitda',lastEbitda1)}</div>
+    <div class="kpi"><div class="kpi-label">EBITDA BC2</div><div class="kpi-value">
+      <span style="color:${lastEbitda2?lastEbitda2>=10?'var(--green)':lastEbitda2>=5?'var(--yellow)':'var(--red)':'var(--muted)'}">${lastEbitda2?lastEbitda2.toFixed(1)+'%':'—'}</span></div>
+      <div class="kpi-sub">Target: 10–18%</div>${kpiTag('ebitda',lastEbitda2)}</div>
+  `;
+
+  // ── ALERTS ──
+  const worstG=DATA.reduce((a,b)=>a.bc1g<b.bc1g?a:b);
+  document.getElementById('alertMain').innerHTML=`
+    <div class="al r"><div class="al-t">🔴 Alerta Crítica</div><div class="al-b"><strong>${worstG.mes}:</strong> Ganancia BC1 mínima <strong>${fmt(worstG.bc1g)}</strong>. Prime Cost: ${prime(worstG,1)?prime(worstG,1)+'%':'—'}.</div></div>
+    <div class="al y"><div class="al-t">⚠️ Labor — Nunca en target</div><div class="al-b">BC1 prom <strong>${avgP1?avgP1.toFixed(1):'—'}%</strong> · BC2 prom <strong>${avgP2?avgP2.toFixed(1):'—'}%</strong>. Benchmark: 25–33%. Target ideal: &lt;25%.</div></div>
+    <div class="al g"><div class="al-t">✅ COGS BC2</div><div class="al-b">BC2 promedia <strong>${avgC2?avgC2.toFixed(1):'—'}%</strong> food cost — dentro de rango normal. Julio <strong>26.8%</strong> fue excelente.</div></div>
+  `;
+
+  // ── INSIGHT ──
+  document.getElementById('insightMain').innerHTML=`
+    <strong>BC1</strong> — Venta prom ${fmt(avg(bc1V))}/mes · COGS prom <strong style="color:${avgC1<30?'#81c784':'#ffd54f'}">${avgC1?avgC1.toFixed(1):'—'}%</strong> · Labor prom <strong style="color:#ffd54f">${avgP1?avgP1.toFixed(1):'—'}%</strong> · Prime Cost último mes <strong style="color:${lastPrime1<65?'#ffd54f':'#ef9a9a'}">${lastPrime1?lastPrime1.toFixed(1):'—'}%</strong>.<br>
+    <strong>BC2</strong> — Venta prom ${fmt(avg(bc2V.filter(v=>v>0)))}/mes · COGS prom <strong style="color:${avgC2<30?'#81c784':'#ffd54f'}">${avgC2?avgC2.toFixed(1):'—'}%</strong> · Labor prom <strong style="color:#ef9a9a">${avgP2?avgP2.toFixed(1):'—'}%</strong>.<br>
+    <strong>Benchmark Fast Casual:</strong> Prime Cost objetivo 55–65% · COGS objetivo &lt;30% · Labor objetivo &lt;25% · EBITDA objetivo 10–18%.
+  `;
+
+  // ── OVERVIEW CHARTS ──
+  charts.vc=new Chart('cVcomb',{type:'bar',data:{labels,datasets:[{label:'BC1',data:bc1V,backgroundColor:GOLD,borderRadius:3,stack:'v'},{label:'BC2',data:bc2V,backgroundColor:BLUE,borderRadius:3,stack:'v'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:8,padding:12}}},scales:{x:{grid:{color:'#1a1a1a'},stacked:true},y:{grid:{color:'#1a1a1a'},stacked:true,ticks:{callback:v=>'$'+(v/1e6).toFixed(0)+'M'}}}}});
+  charts.gn=new Chart('cGan',{type:'bar',data:{labels,datasets:[{label:'BC1',data:bc1G,backgroundColor:GOLD,borderRadius:3},{label:'BC2',data:bc2G,backgroundColor:BLUE,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:8,padding:12}}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},ticks:{callback:v=>'$'+(v/1e6).toFixed(0)+'M'}}}}});
+
+  // COGS with threshold annotations via background colors
+  const cogsColors1=bc1C.map(v=>v===null?'#333':v<30?'rgba(76,175,80,.75)':v<34?'rgba(249,168,37,.75)':'rgba(183,28,28,.85)');
+  const cogsColors2=bc2C.map(v=>v===null?'#333':v<30?'rgba(76,175,80,.75)':v<34?'rgba(249,168,37,.75)':'rgba(183,28,28,.85)');
+  charts.cog=new Chart('cCOGSov',{type:'bar',data:{labels,datasets:[
+    {label:'COGS BC1',data:bc1C,backgroundColor:cogsColors1,borderRadius:3},
+    {label:'COGS BC2',data:bc2C,backgroundColor:cogsColors2.map(c=>c.replace('rgba(','rgba(').replace(/.75\)|.85\)/,'.45)')),borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:8,padding:12}}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},min:24,max:38,ticks:{callback:v=>v+'%'}}}}});
+
+  // Prime Cost chart
+  charts.pr=new Chart('cPrime',{type:'line',data:{labels,datasets:[
+    {label:'Prime BC1',data:bc1Prime,borderColor:GOLD,tension:.3,fill:false,pointRadius:4},
+    {label:'Prime BC2',data:bc2Prime,borderColor:BLUE,tension:.3,fill:false,pointRadius:4},
+    {label:'Target min 55%',data:Array(N).fill(55),borderColor:'#43a047',borderDash:[4,4],pointRadius:0,fill:false},
+    {label:'Target max 65%',data:Array(N).fill(65),borderColor:'#f9a825',borderDash:[4,4],pointRadius:0,fill:false},
+    {label:'Danger 70%',data:Array(N).fill(70),borderColor:RED,borderDash:[3,3],pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:8,padding:10}}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},min:40,max:85,ticks:{callback:v=>v+'%'}}}}});
+
+  // ── BENCHMARK SECTION ──
+  // Gauge needles  (scale: 40% = 0% needle, 85% = 100% needle)
+  function needlePos(val,min=40,max=85){if(!val)return 0;return Math.min(100,Math.max(0,((val-min)/(max-min))*100));}
+  if(lastPrime1!==null){
+    document.getElementById('bPrimeVal1').textContent=lastPrime1.toFixed(1)+'%';
+    document.getElementById('bPrimeVal1').style.color=lastPrime1<55?'#81c784':lastPrime1<65?'#ffd54f':lastPrime1<70?'#ffb74d':'#ef9a9a';
+    document.getElementById('bPrimeNeedle1').style.left=needlePos(lastPrime1)+'%';
+    const s1=bmStatus('prime',lastPrime1);
+    document.getElementById('bPrimeComment1').textContent={excellent:'✓ Por debajo del rango — margen operativo sólido',normal:'✓ Dentro del rango objetivo (55–65%)',warning:'⚠ Presión en márgenes — revisar COGS o Labor',danger:'✗ Fuera de control — requiere acción urgente'}[s1]||'';
+  }
+  if(lastPrime2!==null){
+    document.getElementById('bPrimeVal2').textContent=lastPrime2.toFixed(1)+'%';
+    document.getElementById('bPrimeVal2').style.color=lastPrime2<55?'#81c784':lastPrime2<65?'#ffd54f':lastPrime2<70?'#ffb74d':'#ef9a9a';
+    document.getElementById('bPrimeNeedle2').style.left=needlePos(lastPrime2)+'%';
+    const s2=bmStatus('prime',lastPrime2);
+    document.getElementById('bPrimeComment2').textContent={excellent:'✓ Por debajo del rango — margen operativo sólido',normal:'✓ Dentro del rango objetivo (55–65%)',warning:'⚠ Presión en márgenes — revisar COGS o Labor',danger:'✗ Fuera de control — requiere acción urgente'}[s2]||'';
+  }
+
+  // Benchmark cards grid
+  const bCards=[
+    {title:'COGS / Food Cost',rows:[
+      {name:'BC1 último mes',val:last.bc1c,metric:'cogs',unit:'%'},
+      {name:'BC2 último mes',val:last.bc2c,metric:'cogs',unit:'%'},
+      {name:'BC1 promedio',val:avgC1,metric:'cogs',unit:'%'},
+      {name:'BC2 promedio',val:avgC2,metric:'cogs',unit:'%'},
+    ],ref:'Excelente: 26–30% · Normal: 30–34% · Problema: 35%+'},
+    {title:'Labor / Costo Personal',rows:[
+      {name:'BC1 último mes',val:last.bc1p,metric:'labor',unit:'%'},
+      {name:'BC2 último mes',val:last.bc2p,metric:'labor',unit:'%'},
+      {name:'BC1 promedio',val:avgP1,metric:'labor',unit:'%'},
+      {name:'BC2 promedio',val:avgP2,metric:'labor',unit:'%'},
+    ],ref:'Excelente: &lt;25% · Normal: 25–33% · Problema: 33%+'},
+    {title:'Prime Cost = COGS + Labor',rows:[
+      {name:'BC1 último mes',val:lastPrime1,metric:'prime',unit:'%'},
+      {name:'BC2 último mes',val:lastPrime2,metric:'prime',unit:'%'},
+      {name:'BC1 promedio',val:avg(bc1Prime),metric:'prime',unit:'%'},
+      {name:'BC2 promedio',val:avg(bc2Prime),metric:'prime',unit:'%'},
+    ],ref:'Target: 55–65% · Danger: &gt;70%'},
+    {title:'EBITDA Tienda',rows:[
+      {name:'BC1 último mes',val:lastEbitda1,metric:'ebitda',unit:'%'},
+      {name:'BC2 último mes',val:lastEbitda2,metric:'ebitda',unit:'%'},
+      {name:'BC1 mejor mes',val:Math.max(...DATA.map(d=>ebitda(d,1)).filter(v=>v!==null)),metric:'ebitda',unit:'%'},
+      {name:'BC2 mejor mes',val:Math.max(...DATA.filter(d=>d.bc2v>0).map(d=>ebitda(d,2)).filter(v=>v!==null)),metric:'ebitda',unit:'%'},
+    ],ref:'Excelente: &gt;18% · Normal: 10–18% · Atención: 5–10%'},
+    {title:'Comisión Delivery',rows:[
+      {name:'BC1 último mes',val:last.bc1d,metric:'delivery',unit:'%'},
+      {name:'BC2 último mes',val:last.bc2d,metric:'delivery',unit:'%'},
+    ],ref:'Normal: &lt;16% sobre canal delivery · Excelente: &lt;12%'},
+    {title:'Margen Bruto (1–COGS)',rows:[
+      {name:'BC1 último mes',val:mgnBruto(last.bc1c),metric:'margen',unit:'%'},
+      {name:'BC2 último mes',val:mgnBruto(last.bc2c),metric:'margen',unit:'%'},
+      {name:'BC1 promedio',val:mgnBruto(avgC1),metric:'margen',unit:'%'},
+      {name:'BC2 promedio',val:mgnBruto(avgC2),metric:'margen',unit:'%'},
+    ],ref:'Excelente: &gt;66% · Normal: 60–66%'},
+  ];
+
+  document.getElementById('bmGrid').innerHTML=bCards.map(c=>`
+    <div class="bm-card">
+      <div class="bm-card-title">${c.title}</div>
+      ${c.rows.map(r=>`
+        <div class="bm-row">
+          <span class="bm-name">${r.name}</span>
+          <span class="bm-range">${r.val!==null?r.val.toFixed(1)+r.unit:'—'}</span>
+          ${r.val!==null?pill(r.metric,r.val):'<span class="c-mu">Sin dato</span>'}
+        </div>`).join('')}
+      <div style="margin-top:10px;font-size:9px;color:var(--muted)">${c.ref}</div>
+    </div>`).join('');
+
+  // Benchmark history table
+  const tbm=document.getElementById('tBm'); tbm.innerHTML='';
+  DATA.forEach(d=>{
+    const p1=prime(d,1),p2=prime(d,2),e1=ebitda(d,1),mb1=mgnBruto(d.bc1c);
+    tbm.innerHTML+=`<tr>
+      <td>${d.mes}</td>
+      <td class="${tdClass('cogs',d.bc1c)}">${d.bc1c?d.bc1c.toFixed(2)+'%':'—'}</td>
+      <td>${pill('cogs',d.bc1c)}</td>
+      <td class="${tdClass('labor',d.bc1p)}">${d.bc1p?d.bc1p.toFixed(2)+'%':'—'}</td>
+      <td>${pill('labor',d.bc1p)}</td>
+      <td class="${tdClass('prime',p1)}">${p1?p1.toFixed(1)+'%':'—'}</td>
+      <td>${pill('prime',p1)}</td>
+      <td class="${tdClass('cogs',d.bc2c)}">${d.bc2c?d.bc2c.toFixed(2)+'%':'—'}</td>
+      <td>${pill('cogs',d.bc2c)}</td>
+      <td class="${tdClass('labor',d.bc2p)}">${d.bc2p?d.bc2p.toFixed(2)+'%':'—'}</td>
+      <td>${pill('labor',d.bc2p)}</td>
+      <td class="${tdClass('prime',p2)}">${p2?p2.toFixed(1)+'%':'—'}</td>
+      <td>${pill('prime',p2)}</td>
+      <td class="${tdClass('ebitda',e1)}">${e1?e1.toFixed(1)+'%':'—'}</td>
+    </tr>`;
+  });
+
+  // ── VENTAS CHARTS ──
+  charts.bv=new Chart('cBC1v',{type:'line',data:{labels,datasets:[{label:'BC1',data:bc1V,borderColor:GOLD,backgroundColor:GOLDT,tension:.3,fill:true,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},ticks:{callback:v=>'$'+(v/1e6).toFixed(0)+'M'}}}}});
+  const avgI=avg(bc1V);const idxArr=bc1V.map(v=>Math.round(v/avgI*100));
+  charts.es=new Chart('cEstac',{type:'bar',data:{labels,datasets:[{label:'Índice',data:idxArr,backgroundColor:idxArr.map(v=>v>=100?'rgba(76,175,80,.7)':'rgba(229,57,53,.6)'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'}}}}});
+  charts.cv=new Chart('cBC1v2',{type:'bar',data:{labels,datasets:[{label:'BC1',data:bc1V,backgroundColor:GOLD,borderRadius:3},{label:'BC2',data:bc2V,backgroundColor:BLUE,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:8,padding:12}}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},ticks:{callback:v=>'$'+(v/1e6).toFixed(0)+'M'}}}}});
+
+  // ── COSTOS CHARTS ──
+  charts.c1=new Chart('cC1',{type:'bar',data:{labels,datasets:[{label:'COGS BC1',data:bc1C,backgroundColor:cogsColors1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},min:24,max:38,ticks:{callback:v=>v+'%'}}}}});
+  charts.c2=new Chart('cC2',{type:'bar',data:{labels,datasets:[{label:'COGS BC2',data:bc2C,backgroundColor:cogsColors2,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},min:24,max:38,ticks:{callback:v=>v+'%'}}}}});
+  charts.gc=new Chart('cGC',{type:'bar',data:{labels,datasets:[{label:'Ganancia Total',data:ganT,backgroundColor:ganT.map(v=>v>20e6?'rgba(76,175,80,.7)':v>5e6?'rgba(255,193,7,.7)':'rgba(229,57,53,.7)'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},ticks:{callback:v=>'$'+(v/1e6).toFixed(0)+'M'}}}}});
+
+  // Costos table
+  const tc=document.getElementById('tCost'); tc.innerHTML='';
+  DATA.forEach(d=>{
+    const mb1=mgnBruto(pNet(d.bc1c)), mb2=mgnBruto(pNet(d.bc2c)), gt=d.bc1g+d.bc2g;
+    const c1n=pNet(d.bc1c), c2n=pNet(d.bc2c);
+    tc.innerHTML+=`<tr>
+      <td>${d.mes}</td>
+      <td>${fmt(vNet(d.bc1v))}</td>
+      <td class="${tdClass('cogs',c1n)}">${c1n?c1n.toFixed(2)+'%':'—'}</td>
+      <td class="${tdClass('margen',mb1)}">${mb1?mb1.toFixed(1)+'%':'—'}</td>
+      <td class="${d.bc1g>15e6?'c-ex':d.bc1g>5e6?'c-no':'c-ba'}">${fmt(d.bc1g)}</td>
+      <td>${d.bc2v?fmt(vNet(d.bc2v)):'<span class="c-mu">—</span>'}</td>
+      <td class="${tdClass('cogs',c2n)}">${c2n?c2n.toFixed(2)+'%':'—'}</td>
+      <td class="${tdClass('margen',mb2)}">${mb2?mb2.toFixed(1)+'%':'—'}</td>
+      <td class="${d.bc2g>3e6?'c-ex':d.bc2g>0?'c-no':'c-ba'}">${fmt(d.bc2g)}</td>
+      <td class="${gt>20e6?'c-ex':gt>5e6?'c-no':'c-ba'}">${fmt(gt)}</td>
+    </tr>`;
+  });
+
+  // ── PERSONAL ──
+  const maxP1=Math.max(...bc1P.filter(v=>v!==null)), maxP2=Math.max(...bc2P.filter(v=>v!==null));
+  document.getElementById('kpiPers').innerHTML=`
+    <div class="kpi"><div class="kpi-label">Labor Prom BC1</div><div class="kpi-value" style="color:var(--red)">${avgP1?avgP1.toFixed(1)+'%':'—'}</div><div class="kpi-sub">Target: 25–33% · Ideal &lt;25%</div>${kpiTag('labor',avgP1)}</div>
+    <div class="kpi"><div class="kpi-label">Labor Prom BC2</div><div class="kpi-value" style="color:var(--red)">${avgP2?avgP2.toFixed(1)+'%':'—'}</div><div class="kpi-sub">Target: 25–33% · Ideal &lt;25%</div>${kpiTag('labor',avgP2)}</div>
+    <div class="kpi"><div class="kpi-label">Peor mes BC1</div><div class="kpi-value" style="color:var(--red)">${maxP1?maxP1+'%':'—'}</div><div class="kpi-sub">${sh(DATA[bc1P.indexOf(maxP1)]?.mes||'—')}</div></div>
+    <div class="kpi"><div class="kpi-label">Peor mes BC2</div><div class="kpi-value" style="color:var(--red)">${maxP2?maxP2+'%':'—'}</div><div class="kpi-sub">${sh(DATA[bc2P.indexOf(maxP2)]?.mes||'—')} 🚨</div></div>
+  `;
+
+  const laborColors1=bc1P.map(v=>v===null?'transparent':v<25?'rgba(76,175,80,.75)':v<33?'rgba(249,168,37,.75)':'rgba(183,28,28,.85)');
+  const laborColors2=bc2P.map(v=>v===null?'transparent':v<25?'rgba(76,175,80,.75)':v<33?'rgba(249,168,37,.75)':'rgba(183,28,28,.85)');
+  charts.pe=new Chart('cPers',{type:'bar',data:{labels,datasets:[
+    {label:'Labor BC1',data:bc1P,backgroundColor:laborColors1,borderRadius:3},
+    {label:'Labor BC2',data:bc2P,backgroundColor:laborColors2.map(c=>c.replace(/\.75\)|\.85\)/,'.45)')),borderRadius:3},
+    {label:'Target 25%',data:Array(N).fill(25),type:'line',borderColor:'#43a047',borderDash:[4,4],pointRadius:0,fill:false},
+    {label:'Límite 33%',data:Array(N).fill(33),type:'line',borderColor:'#f57f17',borderDash:[4,4],pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:8,padding:10}}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},min:15,max:48,ticks:{callback:v=>v+'%'}}}}});
+
+  charts.co=new Chart('cCorr',{type:'line',data:{labels,datasets:[
+    {label:'Ganancia BC1 ($M)',data:bc1G.map(v=>+(v/1e6).toFixed(1)),borderColor:GREEN,tension:.3,fill:false,pointRadius:4,yAxisID:'y'},
+    {label:'Labor BC1 %',data:bc1P,borderColor:RED,tension:.3,fill:false,pointRadius:4,yAxisID:'y2'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:8,padding:10}}},scales:{x:{grid:{color:'#1a1a1a'}},y:{grid:{color:'#1a1a1a'},position:'left',ticks:{callback:v=>'$'+v+'M'}},y2:{grid:{display:false},position:'right',ticks:{callback:v=>v+'%'}}}}});
+
+  document.getElementById('laborDx').innerHTML=`
+    El costo de personal <strong>nunca ha cumplido el target ideal de &lt;25%</strong> en ningún mes registrado.<br>
+    BC1 promedia <strong>${avgP1?avgP1.toFixed(1):'—'}%</strong> — requiere reducir aprox. <strong>${avgP1?fmt(Math.round(vNet(last.bc1v)*(avgP1-25)/100)):'—'}/mes</strong> para llegar al límite normal de 25%.<br>
+    BC2 crítico: <strong>${avgP2?avgP2.toFixed(1):'—'}% promedio</strong> con pico de <strong>${maxP2}%</strong> en ${sh(DATA[bc2P.indexOf(maxP2)]?.mes||'—')}.<br>
+    Benchmark Fast Casual: Cocina 12–18% · Sala/Caja 8–14% · Jefaturas 2–5%.
+  `;
+
+  // ── FULL TABLE ──
+  const tf=document.getElementById('tFull'); tf.innerHTML='';
+  DATA.forEach((d,i)=>{
+    const p1=prime(d,1),p2=prime(d,2),tv=vNet(d.bc1v)+vNet(d.bc2v),tg=d.bc1g+d.bc2g,isBase=i<BASE.length;
+    const c1n=pNet(d.bc1c),c2n=pNet(d.bc2c),lp1n=pNet(d.bc1p),lp2n=pNet(d.bc2p);
+    tf.innerHTML+=`<tr>
+      <td>${d.mes}</td>
+      <td>${fmt(vNet(d.bc1v))}</td>
+      <td class="${tdClass('cogs',c1n)}">${c1n?c1n.toFixed(2)+'%':'—'}</td>
+      <td class="${tdClass('labor',lp1n)}">${lp1n?lp1n.toFixed(2)+'%':'—'}</td>
+      <td class="${tdClass('prime',p1)}">${p1?p1.toFixed(1)+'%':'—'}</td>
+      <td class="${d.bc1g>15e6?'c-ex':d.bc1g>5e6?'c-no':'c-ba'}">${fmt(d.bc1g)}</td>
+      <td>${d.bc2v?fmt(vNet(d.bc2v)):'<span class="c-mu">—</span>'}</td>
+      <td class="${tdClass('cogs',c2n)}">${c2n?c2n.toFixed(2)+'%':'—'}</td>
+      <td class="${tdClass('labor',lp2n)}">${lp2n?lp2n.toFixed(2)+'%':'—'}</td>
+      <td class="${tdClass('prime',p2)}">${p2?p2.toFixed(1)+'%':'—'}</td>
+      <td class="${d.bc2g>3e6?'c-ex':d.bc2g>0?'c-no':'c-ba'}">${fmt(d.bc2g)}</td>
+      <td>${fmt(tv)}</td>
+      <td class="${tg>20e6?'c-ex':tg>5e6?'c-no':'c-ba'}">${fmt(tg)}</td>
+      <td>${!isBase?`<button class="btn-del" onclick="delMonth(${i})">✕</button>`:''}</td>
+    </tr>`;
+  });
+}
+
+// ══════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════
+function openModal(){document.getElementById('mo').classList.add('open');}
+function closeModal(){document.getElementById('mo').classList.remove('open');clearForm();}
+function clearForm(){
+  ['fmes','fmcc','fb1v','fb1g','fb1c','fb1p','fb1d','fb1r','fb2v','fb2g','fb2c','fb2p','fb2d','fb2r'].forEach(id=>{
+    const el=document.getElementById(id);if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';
+  });
+  document.getElementById('fmcg').style.display='none';
+}
+document.getElementById('fmes').addEventListener('change',function(){
+  document.getElementById('fmcg').style.display=this.value==='custom'?'block':'none';
+});
+document.getElementById('mo').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function saveMonth(){
+  const sel=document.getElementById('fmes').value;
+  const mes=sel==='custom'?document.getElementById('fmcc').value.trim():sel;
+  if(!mes){showToast('Selecciona un mes','error');return;}
+  if(DATA.find(d=>d.mes===mes)){showToast('Ese mes ya existe','error');return;}
+  const bc1v=parseFloat(document.getElementById('fb1v').value);
+  const bc1g=parseFloat(document.getElementById('fb1g').value);
+  if(!bc1v||isNaN(bc1v)||!bc1g||isNaN(bc1g)){showToast('Ventas y ganancia BC1 son obligatorias','error');return;}
+  const row={mes,bc1v,bc1g,
+    bc2v:parseFloat(document.getElementById('fb2v').value)||0,
+    bc2g:parseFloat(document.getElementById('fb2g').value)||0,
+    bc1c:parseFloat(document.getElementById('fb1c').value)||null,
+    bc2c:parseFloat(document.getElementById('fb2c').value)||null,
+    bc1p:parseFloat(document.getElementById('fb1p').value)||null,
+    bc2p:parseFloat(document.getElementById('fb2p').value)||null,
+    bc1d:parseFloat(document.getElementById('fb1d').value)||null,
+    bc2d:parseFloat(document.getElementById('fb2d').value)||null,
+    bc1r:parseFloat(document.getElementById('fb1r').value)||null,
+    bc2r:parseFloat(document.getElementById('fb2r').value)||null,
+  };
+  DATA.push(row);saveExtras(DATA);closeModal();render();showToast('✓ '+mes+' guardado','success');
+}
+function delMonth(i){
+  if(!confirm('¿Eliminar '+DATA[i].mes+'?'))return;
+  DATA.splice(i,1);saveExtras(DATA);render();showToast('Mes eliminado','success');
+}
+
+// ══════════════════════════════════════════════
+//  EXPORT / TABS / TOAST
+// ══════════════════════════════════════════════
+function exportCSV(){
+  const h=['Mes','Ventas BC1','COGS BC1%','Labor BC1%','Prime BC1%','EBITDA BC1%','Ganancia BC1','Ventas BC2','COGS BC2%','Labor BC2%','Prime BC2%','EBITDA BC2%','Ganancia BC2','Total Ventas','Total Ganancia'];
+  const rows=DATA.map(d=>[d.mes,vNet(d.bc1v).toFixed(0),pNet(d.bc1c)||'',pNet(d.bc1p)||'',prime(d,1)||'',ebitda(d,1)||'',d.bc1g,vNet(d.bc2v).toFixed(0),pNet(d.bc2c)||'',pNet(d.bc2p)||'',prime(d,2)||'',ebitda(d,2)||'',d.bc2g,(vNet(d.bc1v)+vNet(d.bc2v)).toFixed(0),d.bc1g+d.bc2g]);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([[h,...rows].map(r=>r.join(',')).join('\n')],{type:'text/csv'}));
+  a.download='bc-historico-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+function showSec(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+render();
+</script>
+</body>
+</html>

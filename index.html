@@ -561,8 +561,8 @@ function render(){
   // ── KPI MAIN ──
   const maxB1=Math.max(...bc1V), maxB2=Math.max(...bc2V.filter(v=>v>0));
   document.getElementById('kpiMain').innerHTML=`
-    <div class="kpi"><div class="kpi-label">Venta Acumulada BC1</div><div class="kpi-value" style="color:var(--gold)">${fmt(bc1V.reduce((a,b)=>a+b,0),0)}</div><div class="kpi-sub">Las Condes · ${N} meses</div></div>
-    <div class="kpi"><div class="kpi-label">Venta Acumulada BC2</div><div class="kpi-value" style="color:var(--blue)">${fmt(bc2V.reduce((a,b)=>a+b,0),0)}</div><div class="kpi-sub">BC2 · ${bc2V.filter(v=>v>0).length} meses</div></div>
+    <div class="kpi"><div class="kpi-label">Venta Acumulada BC1</div><div class="kpi-value" style="color:var(--gold)">${fmt(DATA.filter(d=>d.mes.includes('2026')).reduce((a,d)=>a+vNet(d.bc1v),0),0)}</div><div class="kpi-sub">Las Condes · 2026 · ${DATA.filter(d=>d.mes.includes('2026')).length} meses</div></div>
+    <div class="kpi"><div class="kpi-label">Venta Acumulada BC2</div><div class="kpi-value" style="color:var(--blue)">${fmt(DATA.filter(d=>d.mes.includes('2026')&&d.bc2v>0).reduce((a,d)=>a+vNet(d.bc2v),0),0)}</div><div class="kpi-sub">BC2 · 2026 · ${DATA.filter(d=>d.mes.includes('2026')&&d.bc2v>0).length} meses</div></div>
     <div class="kpi"><div class="kpi-label">COGS Prom BC1</div><div class="kpi-value ${avgC1<30?'':''}">
       <span style="color:${avgC1<30?'var(--green)':avgC1<34?'var(--yellow)':'var(--red)'}">${avgC1?avgC1.toFixed(1)+'%':'—'}</span></div>
       <div class="kpi-sub">Target: &lt;30%</div>${kpiTag('cogs',avgC1)}</div>

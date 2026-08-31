@@ -503,6 +503,10 @@ const BASE = [
   {mes:'Enero 2026',    bc1v:135849824,bc2v:47063795, bc1c:31.06,bc2c:27.70,bc1g:12892368,bc2g:4019246, bc1p:29.60,bc2p:32.34,bc1d:13.13,bc2d:5.54,bc1r:null,bc2r:null},
   {mes:'Febrero 2026',  bc1v:127681773,bc2v:44825639, bc1c:30.94,bc2c:34.05,bc1g:6310763, bc2g:2915856, bc1p:31.76,bc2p:39.66,bc1d:13.96,bc2d:5.66,bc1r:null,bc2r:null},
   {mes:'Marzo 2026',   bc1v:162549691,bc2v:57246182, bc1c:29.24,bc2c:29.94,bc1g:16529599,bc2g:8388349, bc1p:22.60,bc2p:37.90,bc1d:14.13,bc2d:5.66,bc1r:null,bc2r:null},
+  {mes:'Abril 2026',    bc1v:160683311,bc2v:56856312, bc1c:27.12,bc2c:24.78,bc1g:18494864,bc2g:7959156, bc1p:31.61,bc2p:33.02,bc1d:14.54,bc2d:5.65,bc1r:null,bc2r:null},
+  {mes:'Mayo 2026',     bc1v:154552232,bc2v:49624824, bc1c:28.36,bc2c:27.48,bc1g:11488734,bc2g:3988603, bc1p:33.39,bc2p:32.85,bc1d:14.84,bc2d:5.56,bc1r:null,bc2r:null},
+  {mes:'Junio 2026',    bc1v:150747542,bc2v:55560742, bc1c:29.98,bc2c:25.20,bc1g:15716396,bc2g:8564827, bc1p:34.52,bc2p:30.26,bc1d:14.38,bc2d:5.72,bc1r:null,bc2r:null},
+  {mes:'Julio 2026',    bc1v:159288761,bc2v:53197447, bc1c:31.20,bc2c:27.02,bc1g:4668784, bc2g:2284251, bc1p:30.65,bc2p:37.98,bc1d:14.42,bc2d:5.80,bc1r:null,bc2r:null},
 ];
 const BASE_MESES = BASE.map(d=>d.mes);
 const SK = 'bc_months_v2';
@@ -585,7 +589,7 @@ function render(){
   document.getElementById('alertMain').innerHTML=`
     <div class="al r"><div class="al-t">🔴 Alerta Crítica</div><div class="al-b"><strong>${worstG.mes}:</strong> Ganancia BC1 mínima <strong>${fmt(worstG.bc1g)}</strong>. Prime Cost: ${prime(worstG,1)?prime(worstG,1)+'%':'—'}.</div></div>
     <div class="al y"><div class="al-t">⚠️ Labor — Nunca en target</div><div class="al-b">BC1 prom <strong>${avgP1?avgP1.toFixed(1):'—'}%</strong> · BC2 prom <strong>${avgP2?avgP2.toFixed(1):'—'}%</strong>. Benchmark: 25–33%. Target ideal: &lt;25%.</div></div>
-    <div class="al g"><div class="al-t">✅ COGS BC2</div><div class="al-b">BC2 promedia <strong>${avgC2?avgC2.toFixed(1):'—'}%</strong> food cost — dentro de rango normal. Julio <strong>26.8%</strong> fue excelente.</div></div>
+    <div class="al g"><div class="al-t">✅ COGS BC2</div><div class="al-b">BC2 promedia <strong>${avgC2?avgC2.toFixed(1):'—'}%</strong> food cost — dentro de rango normal. Julio 2025 <strong>26.8%</strong> fue excelente.</div></div>
   `;
 
   // ── INSIGHT ──

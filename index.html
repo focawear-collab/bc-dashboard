@@ -501,19 +501,19 @@ const BASE = [
   {mes:'Noviembre 2025',bc1v:148768753,bc2v:48133836, bc1c:30.35,bc2c:30.44,bc1g:331586,  bc2g:3774539, bc1p:26.15,bc2p:34.24,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
   {mes:'Diciembre 2025',bc1v:136289900,bc2v:43506993, bc1c:32.89,bc2c:27.99,bc1g:3777120, bc2g:3702056, bc1p:27.70,bc2p:44.00,bc1d:null,bc2d:null,bc1r:null,bc2r:null},
   {mes:'Enero 2026',    bc1v:135849824,bc2v:47063795, bc1c:31.06,bc2c:27.70,bc1g:13779631,bc2g:4019246, bc1p:29.60,bc2p:32.34,bc1d:12.39,bc2d:5.54,bc1r:null,bc2r:null},
-  {mes:'Febrero 2026',  bc1v:127681773,bc2v:44825639, bc1c:30.94,bc2c:34.05,bc1g:7741158, bc2g:2915856, bc1p:31.76,bc2p:39.66,bc1d:12.84,bc2d:5.66,bc1r:null,bc2r:null},
+  {mes:'Febrero 2026',  bc1v:127681773,bc2v:44825639, bc1c:30.94,bc2c:34.05,bc1g:7311077, bc2g:2915856, bc1p:31.76,bc2p:39.66,bc1d:13.18,bc2d:5.66,bc1r:null,bc2r:null},
   {mes:'Marzo 2026',   bc1v:162549691,bc2v:57246182, bc1c:29.24,bc2c:29.94,bc1g:17597289,bc2g:8388349, bc1p:22.60,bc2p:37.90,bc1d:13.48,bc2d:5.66,bc1r:null,bc2r:null},
-  {mes:'Abril 2026',    bc1v:160683311,bc2v:56856312, bc1c:27.12,bc2c:24.78,bc1g:19500857,bc2g:7959156, bc1p:23.10,bc2p:33.02,bc1d:13.92,bc2d:5.65,bc1r:null,bc2r:null},
-  {mes:'Mayo 2026',     bc1v:154552232,bc2v:49624824, bc1c:28.36,bc2c:27.48,bc1g:12371023,bc2g:3988603, bc1p:25.20,bc2p:32.85,bc1d:14.27,bc2d:5.56,bc1r:null,bc2r:null},
-  {mes:'Junio 2026',    bc1v:150747542,bc2v:55560742, bc1c:29.98,bc2c:25.20,bc1g:16611843,bc2g:8564827, bc1p:26.50,bc2p:30.26,bc1d:13.79,bc2d:5.72,bc1r:null,bc2r:null},
-  {mes:'Julio 2026',    bc1v:159288761,bc2v:53197447, bc1c:31.20,bc2c:27.02,bc1g:5600574, bc2g:2284251, bc1p:23.80,bc2p:37.98,bc1d:13.83,bc2d:5.80,bc1r:null,bc2r:null},
-  // Ago–oct 2026 cargados el 15-nov-2026 desde los resúmenes mensuales.
-  // BC1 ene–jul: comisión y ganancia según la serie corregida del informe de septiembre;
-  // labor BC1 abr–ago según el informe de octubre. Feb y sep usan la comisión corregida
-  // ($16,4M y $19,9M). Octubre viene redondeado a $0,1M en el informe.
-  {mes:'Agosto 2026',   bc1v:167098278,bc2v:58083518, bc1c:29.10,bc2c:27.35,bc1g:24618476,bc2g:3411592, bc1p:24.90,bc2p:33.13,bc1d:13.74,bc2d:5.60,bc1r:null,bc2r:null},
-  {mes:'Septiembre 2026',bc1v:142122712,bc2v:56010499, bc1c:27.46,bc2c:26.24,bc1g:9089104, bc2g:4317770, bc1p:29.79,bc2p:36.37,bc1d:14.00,bc2d:5.82,bc1r:null,bc2r:null},
-  {mes:'Octubre 2026',  bc1v:161500000,bc2v:60400000, bc1c:31.00,bc2c:26.50,bc1g:16000000,bc2g:9600000, bc1p:26.80,bc2p:33.70,bc1d:14.00,bc2d:5.70,bc1r:null,bc2r:null},
+  {mes:'Abril 2026',    bc1v:160683311,bc2v:56856312, bc1c:27.12,bc2c:24.78,bc1g:19500857,bc2g:7959156, bc1p:31.61,bc2p:33.02,bc1d:13.92,bc2d:5.65,bc1r:null,bc2r:null},
+  {mes:'Mayo 2026',     bc1v:154552232,bc2v:49624824, bc1c:28.36,bc2c:27.48,bc1g:12371023,bc2g:3988603, bc1p:33.39,bc2p:32.85,bc1d:14.27,bc2d:5.56,bc1r:null,bc2r:null},
+  {mes:'Junio 2026',    bc1v:150747542,bc2v:55560742, bc1c:29.98,bc2c:25.20,bc1g:16611843,bc2g:8564827, bc1p:34.52,bc2p:30.26,bc1d:13.79,bc2d:5.72,bc1r:null,bc2r:null},
+  {mes:'Julio 2026',    bc1v:159288761,bc2v:53197447, bc1c:31.20,bc2c:27.02,bc1g:5600574, bc2g:2284251, bc1p:30.65,bc2p:37.98,bc1d:13.83,bc2d:5.80,bc1r:null,bc2r:null},
+  // Ago–oct 2026 cargados el 15-nov-2026 y corregidos el 16-nov con el resumen
+  // mensual original de octubre (valores exactos). Comisión y ganancia de BC1
+  // ene–oct: tabla "Resumen del negocio BC1" de ese informe. Costo de personal:
+  // el de cada informe mensual.
+  {mes:'Agosto 2026',   bc1v:167098278,bc2v:58083518, bc1c:29.10,bc2c:27.35,bc1g:24618476,bc2g:3411592, bc1p:33.27,bc2p:33.13,bc1d:13.74,bc2d:5.60,bc1r:null,bc2r:null},
+  {mes:'Septiembre 2026',bc1v:142122712,bc2v:56010499, bc1c:27.46,bc2c:26.24,bc1g:6954005, bc2g:4317770, bc1p:29.79,bc2p:36.37,bc1d:15.50,bc2d:5.82,bc1r:null,bc2r:null},
+  {mes:'Octubre 2026',  bc1v:161487681,bc2v:60369219, bc1c:31.01,bc2c:26.50,bc1g:15986470,bc2g:9580033, bc1p:26.83,bc2p:33.71,bc1d:14.03,bc2d:5.72,bc1r:null,bc2r:null},
 ];
 const BASE_MESES = BASE.map(d=>d.mes);
 const SK = 'bc_months_v2';
